@@ -32,6 +32,9 @@
 
       <div style="position:relative">
         <div class="tips">
+          <span> 哈尔滨理工大学 1914010805 金伟民</span>
+        </div>
+        <div class="tips">
           <span> 超级管理员用户名: admin123</span>
           <span> 超级管理员用户名：admin123</span>
         </div>
@@ -47,7 +50,7 @@
     </el-form>
 
     <div class="copyright">
-      Copyright © 2020 xxx.com 版权所有 <a href="http://www.example.com/">沪ICP备xxx号</a>
+      Copyright © 2022 金伟民
     </div>
   </div>
 </template>

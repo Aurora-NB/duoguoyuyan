@@ -33,7 +33,7 @@ module.exports = {
     open: true,
     proxy: {
       '/admin': {
-        target: 'https://wxapp.simplesay.top/', // 不能为空
+        target: 'http://124.221.14.180:8080', // 不能为空
         ws: true,
         changOrigin: true
       }
