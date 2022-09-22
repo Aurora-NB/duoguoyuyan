@@ -334,8 +334,6 @@ public class WxOrderService {
         }
 
 
-
-
         // 根据订单商品总价计算运费，满足条件（例如88元）则免运费，否则需要支付运费（例如8元）；
         BigDecimal freightPrice = new BigDecimal(0);
         if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
@@ -570,7 +568,7 @@ public class WxOrderService {
             orderRequest.setTotalFee(fee);
             orderRequest.setSpbillCreateIp(IpUtil.getIpAddr(request));
 
-            result = wxPayService.createOrder(orderRequest);
+//            result = wxPayService.createOrder(orderRequest);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseUtil.fail(ORDER_PAY_FAIL, "订单不能支付");

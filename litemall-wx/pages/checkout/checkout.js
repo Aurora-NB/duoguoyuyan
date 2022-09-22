@@ -126,7 +126,6 @@ Page({
       grouponRulesId: this.data.grouponRulesId,
       grouponLinkId: this.data.grouponLinkId
     }, 'POST').then(res => {
-      console.log(111)
       if (res.errno === 0) {
         const orderId = res.data.orderId;
         const grouponLinkId = res.data.grouponLinkId;
@@ -136,44 +135,71 @@ Page({
           if (res.errno === 0) {
             const payParam = res.data;
             console.log("支付过程开始");
-            wx.requestPayment({
-              'timeStamp': payParam.timeStamp,
-              'nonceStr': payParam.nonceStr,
-              'package': payParam.packageValue,
-              'signType': payParam.signType,
-              'paySign': payParam.paySign,
-              'success': function(res) {
-                console.log("支付过程成功");
-                if (grouponLinkId) {
-                  setTimeout(() => {
-                    wx.redirectTo({
-                      url: '/pages/groupon/grouponDetail/grouponDetail?id=' + grouponLinkId
-                    })
-                  }, 1000);
-                } else {
-                  wx.redirectTo({
-                    url: '/pages/payResult/payResult?status=1&orderId=' + orderId
-                  });
-                }
-              },
-              'fail': function(res) {
-                console.log("支付过程失败");
+            // wx.requestPayment({
+            //   'timeStamp': payParam.timeStamp,
+            //   'nonceStr': payParam.nonceStr,
+            //   'package': payParam.packageValue,
+            //   'signType': payParam.signType,
+            //   'paySign': payParam.paySign,
+            //   'success': function(res) {
+            //     console.log("支付过程成功");
+            //     if (grouponLinkId) {
+            //       setTimeout(() => {
+            //         wx.redirectTo({
+            //           url: '/pages/groupon/grouponDetail/grouponDetail?id=' + grouponLinkId
+            //         })
+            //       }, 1000);
+            //     } else {
+            //       wx.redirectTo({
+            //         url: '/pages/payResult/payResult?status=1&orderId=' + orderId
+            //       });
+            //     }
+            //   },
+            //   'fail': function(res) {
+            //     console.log("支付过程失败");
+            //     wx.redirectTo({
+            //       url: '/pages/payResult/payResult?status=0&orderId=' + orderId
+            //     });
+            //   },
+            //   'complete': function(res) {
+            //     console.log("支付过程结束")
+            //   }
+            // });
+            if (grouponLinkId) {
+              setTimeout(() => {
                 wx.redirectTo({
-                  url: '/pages/payResult/payResult?status=0&orderId=' + orderId
-                });
-              },
-              'complete': function(res) {
-                console.log("支付过程结束")
-              }
-            });
+                  url: '/pages/groupon/grouponDetail/grouponDetail?id=' + grouponLinkId
+                })
+              }, 1000);
+            } else {
+              console.log(2222)
+              wx.redirectTo({
+                url: '/pages/payResult/payResult?status=1&orderId=' + orderId
+              });
+            }
           } else {
-            wx.redirectTo({
-              url: '/pages/payResult/payResult?status=0&orderId=' + orderId
-            });
+            console.log(444)
+            // wx.redirectTo({
+            //   url: '/pages/payResult/payResult?status=0&orderId=' + orderId
+            // });
+            if (grouponLinkId) {
+              setTimeout(() => {
+                wx.redirectTo({
+                  url: '/pages/groupon/grouponDetail/grouponDetail?id=' + grouponLinkId
+                })
+              }, 1000);
+            } else {
+              console.log(2222)
+              wx.redirectTo({
+                url: '/pages/payResult/payResult?status=1&orderId=' + orderId
+              });
+            }
+
           }
         });
 
       } else {
+        console.log(333)
         util.showErrorToast(res.errmsg);
       }
     });
