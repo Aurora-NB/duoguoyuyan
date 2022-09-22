@@ -247,8 +247,8 @@ public class WxOrderService {
         }
         Integer cartId = JacksonUtil.parseInteger(body, "cartId");
         Integer addressId = JacksonUtil.parseInteger(body, "addressId");
-        Integer couponId = JacksonUtil.parseInteger(body, "couponId");
-        Integer userCouponId = JacksonUtil.parseInteger(body, "userCouponId");
+//        Integer couponId = JacksonUtil.parseInteger(body, "couponId");
+//        Integer userCouponId = JacksonUtil.parseInteger(body, "userCouponId");
         String message = JacksonUtil.parseString(body, "message");
         Integer grouponRulesId = JacksonUtil.parseInteger(body, "grouponRulesId");
         Integer grouponLinkId = JacksonUtil.parseInteger(body, "grouponLinkId");
@@ -294,7 +294,7 @@ public class WxOrderService {
             }
         }
 
-        if (cartId == null || addressId == null || couponId == null) {
+        if (cartId == null || addressId == null) {
             return ResponseUtil.badArgument();
         }
 

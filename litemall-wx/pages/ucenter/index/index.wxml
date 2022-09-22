@@ -82,10 +82,7 @@
 	</view>
 	<view class='user_column'>
 
-		<view class='user_column_item' bindtap='goHelp'>
-			<image class='user_column_item_image' src='/static/images/help.png'></image>
-			<view class='user_column_item_text'>{{languageMap['帮助中心']}}</view>
-		</view>
+	
 		<view class='user_column_item' bindtap='goFeedback'>
 			<image class='user_column_item_image' src='/static/images/feedback.png'></image>
 			<view class='user_column_item_text'>{{languageMap['意见反馈']}}</view>
@@ -99,6 +96,10 @@
 		<view class='user_column_item' bindtap='aboutUs'>
 			<image class='user_column_item_image' src='/static/images/about.png'></image>
 			<view class='user_column_item_text'>{{languageMap['关于我们']}}</view>
+		</view>
+    <view class='user_column_item' bindtap='goHelp'>
+			<!-- <image class='user_column_item_image' src='/static/images/help.png'></image>
+			<view class='user_column_item_text'>{{languageMap['帮助中心']}}</view> -->
 		</view>
 	</view>
 	<view class='separate'></view>

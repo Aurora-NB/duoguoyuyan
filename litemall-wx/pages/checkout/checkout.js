@@ -126,9 +126,8 @@ Page({
       grouponRulesId: this.data.grouponRulesId,
       grouponLinkId: this.data.grouponLinkId
     }, 'POST').then(res => {
+      console.log(111)
       if (res.errno === 0) {
-
-
         const orderId = res.data.orderId;
         const grouponLinkId = res.data.grouponLinkId;
         util.request(api.OrderPrepay, {
