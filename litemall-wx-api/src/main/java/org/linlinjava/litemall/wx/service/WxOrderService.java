@@ -92,110 +92,113 @@ public class WxOrderService {
    @Autowired
    private LitemallCommentService commentService;
 
-   @Autowired
-   private TaskService taskService;
-   @Autowired
-   private LitemallAftersaleService aftersaleService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private LitemallAftersaleService aftersaleService;
 
-   /**
-    * 订单列表
-    *
-    * @param userId   用户ID
-    * @param showType 订单信息： 0，全部订单； 1，待付款； 2，待发货； 3，待收货； 4，待评价。
-    * @param page     分页页数
-    * @param limit    分页大小
-    * @return 订单列表
-    */
-   public Object list(Integer userId, Integer showType, Integer page, Integer limit, String sort,
-       String order) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
+    /**
+     * 订单列表
+     *
+     * @param userId   用户ID
+     * @param showType 订单信息：
+     *                 0，全部订单；
+     *                 1，待付款；
+     *                 2，待发货；
+     *                 3，待收货；
+     *                 4，待评价。
+     * @param page     分页页数
+     * @param limit     分页大小
+     * @return 订单列表
+     */
+    public Object list(Integer userId, Integer showType, Integer page, Integer limit, String sort, String order) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
 
-      List<Short> orderStatus = OrderUtil.orderStatus(showType);
-      List<LitemallOrder> orderList = orderService.queryByOrderStatus(userId, orderStatus, page,
-          limit, sort, order);
+        List<Short> orderStatus = OrderUtil.orderStatus(showType);
+        List<LitemallOrder> orderList = orderService.queryByOrderStatus(userId, orderStatus, page, limit, sort, order);
 
-      List<Map<String, Object>> orderVoList = new ArrayList<>(orderList.size());
-      for (LitemallOrder o : orderList) {
-         Map<String, Object> orderVo = new HashMap<>();
-         orderVo.put("id", o.getId());
-         orderVo.put("orderSn", o.getOrderSn());
-         orderVo.put("actualPrice", o.getActualPrice());
-         orderVo.put("orderStatusText", OrderUtil.orderStatusText(o));
-         orderVo.put("handleOption", OrderUtil.build(o));
-         orderVo.put("aftersaleStatus", o.getAftersaleStatus());
+        List<Map<String, Object>> orderVoList = new ArrayList<>(orderList.size());
+        for (LitemallOrder o : orderList) {
+            Map<String, Object> orderVo = new HashMap<>();
+            orderVo.put("id", o.getId());
+            orderVo.put("orderSn", o.getOrderSn());
+            orderVo.put("actualPrice", o.getActualPrice());
+            orderVo.put("orderStatusText", OrderUtil.orderStatusText(o));
+            orderVo.put("handleOption", OrderUtil.build(o));
+            orderVo.put("aftersaleStatus", o.getAftersaleStatus());
 
-         LitemallGroupon groupon = grouponService.queryByOrderId(o.getId());
-         if (groupon != null) {
-            orderVo.put("isGroupin", true);
-         } else {
-            orderVo.put("isGroupin", false);
-         }
+            LitemallGroupon groupon = grouponService.queryByOrderId(o.getId());
+            if (groupon != null) {
+                orderVo.put("isGroupin", true);
+            } else {
+                orderVo.put("isGroupin", false);
+            }
 
-         List<LitemallOrderGoods> orderGoodsList = orderGoodsService.queryByOid(o.getId());
-         List<Map<String, Object>> orderGoodsVoList = new ArrayList<>(orderGoodsList.size());
-         for (LitemallOrderGoods orderGoods : orderGoodsList) {
-            Map<String, Object> orderGoodsVo = new HashMap<>();
-            orderGoodsVo.put("id", orderGoods.getId());
-            orderGoodsVo.put("goodsName", orderGoods.getGoodsName());
-            orderGoodsVo.put("number", orderGoods.getNumber());
-            orderGoodsVo.put("picUrl", orderGoods.getPicUrl());
-            orderGoodsVo.put("specifications", orderGoods.getSpecifications());
-            orderGoodsVo.put("price", orderGoods.getPrice());
-            orderGoodsVoList.add(orderGoodsVo);
-         }
-         orderVo.put("goodsList", orderGoodsVoList);
+            List<LitemallOrderGoods> orderGoodsList = orderGoodsService.queryByOid(o.getId());
+            List<Map<String, Object>> orderGoodsVoList = new ArrayList<>(orderGoodsList.size());
+            for (LitemallOrderGoods orderGoods : orderGoodsList) {
+                Map<String, Object> orderGoodsVo = new HashMap<>();
+                orderGoodsVo.put("id", orderGoods.getId());
+                orderGoodsVo.put("goodsName", orderGoods.getGoodsName());
+                orderGoodsVo.put("number", orderGoods.getNumber());
+                orderGoodsVo.put("picUrl", orderGoods.getPicUrl());
+                orderGoodsVo.put("specifications", orderGoods.getSpecifications());
+                orderGoodsVo.put("price",orderGoods.getPrice());
+                orderGoodsVoList.add(orderGoodsVo);
+            }
+            orderVo.put("goodsList", orderGoodsVoList);
 
-         orderVoList.add(orderVo);
-      }
+            orderVoList.add(orderVo);
+        }
 
-      return ResponseUtil.okList(orderVoList, orderList);
-   }
+        return ResponseUtil.okList(orderVoList, orderList);
+    }
 
-   /**
-    * 订单详情
-    *
-    * @param userId  用户ID
-    * @param orderId 订单ID
-    * @return 订单详情
-    */
-   public Object detail(Integer userId, Integer orderId) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
+    /**
+     * 订单详情
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     * @return 订单详情
+     */
+    public Object detail(Integer userId, Integer orderId) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
 
-      // 订单信息
-      LitemallOrder order = orderService.findById(userId, orderId);
-      if (null == order) {
-         return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
-      }
-      if (!order.getUserId().equals(userId)) {
-         return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
-      }
-      Map<String, Object> orderVo = new HashMap<String, Object>();
-      orderVo.put("id", order.getId());
-      orderVo.put("orderSn", order.getOrderSn());
-      orderVo.put("message", order.getMessage());
-      orderVo.put("addTime", order.getAddTime());
-      orderVo.put("consignee", order.getConsignee());
-      orderVo.put("mobile", order.getMobile());
-      orderVo.put("address", order.getAddress());
-      orderVo.put("goodsPrice", order.getGoodsPrice());
-      orderVo.put("freightPrice", order.getFreightPrice());
-      orderVo.put("actualPrice", order.getActualPrice());
-      orderVo.put("orderStatusText", OrderUtil.orderStatusText(order));
-      orderVo.put("handleOption", OrderUtil.build(order));
-      orderVo.put("aftersaleStatus", order.getAftersaleStatus());
-      orderVo.put("expCode", order.getShipChannel());
-      orderVo.put("expName", expressService.getVendorName(order.getShipChannel()));
-      orderVo.put("expNo", order.getShipSn());
+        // 订单信息
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (null == order) {
+            return ResponseUtil.fail(ORDER_UNKNOWN, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "不是当前用户的订单");
+        }
+        Map<String, Object> orderVo = new HashMap<String, Object>();
+        orderVo.put("id", order.getId());
+        orderVo.put("orderSn", order.getOrderSn());
+        orderVo.put("message", order.getMessage());
+        orderVo.put("addTime", order.getAddTime());
+        orderVo.put("consignee", order.getConsignee());
+        orderVo.put("mobile", order.getMobile());
+        orderVo.put("address", order.getAddress());
+        orderVo.put("goodsPrice", order.getGoodsPrice());
+        orderVo.put("freightPrice", order.getFreightPrice());
+        orderVo.put("actualPrice", order.getActualPrice());
+        orderVo.put("orderStatusText", OrderUtil.orderStatusText(order));
+        orderVo.put("handleOption", OrderUtil.build(order));
+        orderVo.put("aftersaleStatus", order.getAftersaleStatus());
+        orderVo.put("expCode", order.getShipChannel());
+        orderVo.put("expName", expressService.getVendorName(order.getShipChannel()));
+        orderVo.put("expNo", order.getShipSn());
 
-      List<LitemallOrderGoods> orderGoodsList = orderGoodsService.queryByOid(order.getId());
+        List<LitemallOrderGoods> orderGoodsList = orderGoodsService.queryByOid(order.getId());
 
-      Map<String, Object> result = new HashMap<>();
-      result.put("orderInfo", orderVo);
-      result.put("orderGoods", orderGoodsList);
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderInfo", orderVo);
+        result.put("orderGoods", orderGoodsList);
 
       // 订单状态为已发货且物流信息不为空
       //"YTO", "800669400640887922"
@@ -298,35 +301,34 @@ public class WxOrderService {
          grouponPrice = grouponRules.getDiscount();
       }
 
-      // 货品价格
-      List<LitemallCart> checkedGoodsList = null;
-      if (cartId.equals(0)) {
-         checkedGoodsList = cartService.queryByUidAndChecked(userId);
-      } else {
-         LitemallCart cart = cartService.findById(cartId);
-         checkedGoodsList = new ArrayList<>(1);
-         checkedGoodsList.add(cart);
-      }
-      if (checkedGoodsList.size() == 0) {
-         return ResponseUtil.badArgumentValue();
-      }
-      BigDecimal checkedGoodsPrice = new BigDecimal(0);
-      for (LitemallCart checkGoods : checkedGoodsList) {
-         //  只有当团购规格商品ID符合才进行团购优惠
-         if (grouponRules != null && grouponRules.getGoodsId().equals(checkGoods.getGoodsId())) {
-            checkedGoodsPrice = checkedGoodsPrice.add(checkGoods.getPrice().subtract(grouponPrice)
-                .multiply(new BigDecimal(checkGoods.getNumber())));
-         } else {
-            checkedGoodsPrice = checkedGoodsPrice.add(
-                checkGoods.getPrice().multiply(new BigDecimal(checkGoods.getNumber())));
-         }
-      }
+        // 货品价格
+        List<LitemallCart> checkedGoodsList = null;
+        if (cartId.equals(0)) {
+            checkedGoodsList = cartService.queryByUidAndChecked(userId);
+        } else {
+            LitemallCart cart = cartService.findById(cartId);
+            checkedGoodsList = new ArrayList<>(1);
+            checkedGoodsList.add(cart);
+        }
+        if (checkedGoodsList.size() == 0) {
+            return ResponseUtil.badArgumentValue();
+        }
+        BigDecimal checkedGoodsPrice = new BigDecimal(0);
+        for (LitemallCart checkGoods : checkedGoodsList) {
+            //  只有当团购规格商品ID符合才进行团购优惠
+            if (grouponRules != null && grouponRules.getGoodsId().equals(checkGoods.getGoodsId())) {
+                checkedGoodsPrice = checkedGoodsPrice.add(checkGoods.getPrice().subtract(grouponPrice).multiply(new BigDecimal(checkGoods.getNumber())));
+            } else {
+                checkedGoodsPrice = checkedGoodsPrice.add(checkGoods.getPrice().multiply(new BigDecimal(checkGoods.getNumber())));
+            }
+        }
 
-      // 根据订单商品总价计算运费，满足条件（例如88元）则免运费，否则需要支付运费（例如8元）；
-      BigDecimal freightPrice = new BigDecimal(0);
-      if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
-         freightPrice = SystemConfig.getFreight();
-      }
+
+        // 根据订单商品总价计算运费，满足条件（例如88元）则免运费，否则需要支付运费（例如8元）；
+        BigDecimal freightPrice = new BigDecimal(0);
+        if (checkedGoodsPrice.compareTo(SystemConfig.getFreightLimit()) < 0) {
+            freightPrice = SystemConfig.getFreight();
+        }
 
       // 可以使用的其他钱，例如用户积分
       BigDecimal integralPrice = new BigDecimal(0);
@@ -551,11 +553,11 @@ public class WxOrderService {
          orderRequest.setTotalFee(fee);
          orderRequest.setSpbillCreateIp(IpUtil.getIpAddr(request));
 
-         result = wxPayService.createOrder(orderRequest);
-      } catch (Exception e) {
-         e.printStackTrace();
-         return ResponseUtil.fail(ORDER_PAY_FAIL, "订单不能支付");
-      }
+//            result = wxPayService.createOrder(orderRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseUtil.fail(ORDER_PAY_FAIL, "订单不能支付");
+        }
 
       if (orderService.updateWithOptimisticLocker(order) == 0) {
          return ResponseUtil.updatedDateExpired();
@@ -721,254 +723,257 @@ public class WxOrderService {
       notifyService.notifySmsTemplateSync(order.getMobile(), NotifyType.PAY_SUCCEED,
           new String[]{orderSn.substring(8, 14)});
 
-      // 请依据自己的模版消息配置更改参数
-      String[] parms = new String[]{
-          order.getOrderSn(),
-          order.getOrderPrice().toString(),
-          DateTimeUtil.getDateTimeDisplayString(order.getAddTime()),
-          order.getConsignee(),
-          order.getMobile(),
-          order.getAddress()
-      };
+        // 请依据自己的模版消息配置更改参数
+        String[] parms = new String[]{
+                order.getOrderSn(),
+                order.getOrderPrice().toString(),
+                DateTimeUtil.getDateTimeDisplayString(order.getAddTime()),
+                order.getConsignee(),
+                order.getMobile(),
+                order.getAddress()
+        };
 
-      // 取消订单超时未支付任务
-      taskService.removeTask(new OrderUnpaidTask(order.getId()));
+        // 取消订单超时未支付任务
+        taskService.removeTask(new OrderUnpaidTask(order.getId()));
 
-      return WxPayNotifyResponse.success("处理成功!");
-   }
+        return WxPayNotifyResponse.success("处理成功!");
+    }
 
-   /**
-    * 订单申请退款
-    * <p>
-    * 1. 检测当前订单是否能够退款； 2. 设置订单申请退款状态。
-    *
-    * @param userId 用户ID
-    * @param body   订单信息，{ orderId：xxx }
-    * @return 订单退款操作结果
-    */
-   public Object refund(Integer userId, String body) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
-      Integer orderId = JacksonUtil.parseInteger(body, "orderId");
-      if (orderId == null) {
-         return ResponseUtil.badArgument();
-      }
+    /**
+     * 订单申请退款
+     * <p>
+     * 1. 检测当前订单是否能够退款；
+     * 2. 设置订单申请退款状态。
+     *
+     * @param userId 用户ID
+     * @param body   订单信息，{ orderId：xxx }
+     * @return 订单退款操作结果
+     */
+    public Object refund(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
 
-      LitemallOrder order = orderService.findById(userId, orderId);
-      if (order == null) {
-         return ResponseUtil.badArgument();
-      }
-      if (!order.getUserId().equals(userId)) {
-         return ResponseUtil.badArgumentValue();
-      }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.badArgumentValue();
+        }
 
-      OrderHandleOption handleOption = OrderUtil.build(order);
-      if (!handleOption.isRefund()) {
-         return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能取消");
-      }
+        OrderHandleOption handleOption = OrderUtil.build(order);
+        if (!handleOption.isRefund()) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能取消");
+        }
 
-      // 设置订单申请退款状态
-      order.setOrderStatus(OrderUtil.STATUS_REFUND);
-      if (orderService.updateWithOptimisticLocker(order) == 0) {
-         return ResponseUtil.updatedDateExpired();
-      }
+        // 设置订单申请退款状态
+        order.setOrderStatus(OrderUtil.STATUS_REFUND);
+        if (orderService.updateWithOptimisticLocker(order) == 0) {
+            return ResponseUtil.updatedDateExpired();
+        }
 
-      //TODO 发送邮件和短信通知，这里采用异步发送
-      // 有用户申请退款，邮件通知运营人员
-      notifyService.notifyMail("退款申请", order.toString());
+        //TODO 发送邮件和短信通知，这里采用异步发送
+        // 有用户申请退款，邮件通知运营人员
+        notifyService.notifyMail("退款申请", order.toString());
 
-      return ResponseUtil.ok();
-   }
+        return ResponseUtil.ok();
+    }
 
-   /**
-    * 确认收货
-    * <p>
-    * 1. 检测当前订单是否能够确认收货； 2. 设置订单确认收货状态。
-    *
-    * @param userId 用户ID
-    * @param body   订单信息，{ orderId：xxx }
-    * @return 订单操作结果
-    */
-   public Object confirm(Integer userId, String body) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
-      Integer orderId = JacksonUtil.parseInteger(body, "orderId");
-      if (orderId == null) {
-         return ResponseUtil.badArgument();
-      }
+    /**
+     * 确认收货
+     * <p>
+     * 1. 检测当前订单是否能够确认收货；
+     * 2. 设置订单确认收货状态。
+     *
+     * @param userId 用户ID
+     * @param body   订单信息，{ orderId：xxx }
+     * @return 订单操作结果
+     */
+    public Object confirm(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
 
-      LitemallOrder order = orderService.findById(userId, orderId);
-      if (order == null) {
-         return ResponseUtil.badArgument();
-      }
-      if (!order.getUserId().equals(userId)) {
-         return ResponseUtil.badArgumentValue();
-      }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.badArgumentValue();
+        }
 
-      OrderHandleOption handleOption = OrderUtil.build(order);
-      if (!handleOption.isConfirm()) {
-         return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能确认收货");
-      }
+        OrderHandleOption handleOption = OrderUtil.build(order);
+        if (!handleOption.isConfirm()) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能确认收货");
+        }
 
-      Short comments = orderGoodsService.getComments(orderId);
-      order.setComments(comments);
+        Short comments = orderGoodsService.getComments(orderId);
+        order.setComments(comments);
 
-      order.setOrderStatus(OrderUtil.STATUS_CONFIRM);
-      order.setConfirmTime(LocalDateTime.now());
-      if (orderService.updateWithOptimisticLocker(order) == 0) {
-         return ResponseUtil.updatedDateExpired();
-      }
-      return ResponseUtil.ok();
-   }
+        order.setOrderStatus(OrderUtil.STATUS_CONFIRM);
+        order.setConfirmTime(LocalDateTime.now());
+        if (orderService.updateWithOptimisticLocker(order) == 0) {
+            return ResponseUtil.updatedDateExpired();
+        }
+        return ResponseUtil.ok();
+    }
 
-   /**
-    * 删除订单
-    * <p>
-    * 1. 检测当前订单是否可以删除； 2. 删除订单。
-    *
-    * @param userId 用户ID
-    * @param body   订单信息，{ orderId：xxx }
-    * @return 订单操作结果
-    */
-   public Object delete(Integer userId, String body) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
-      Integer orderId = JacksonUtil.parseInteger(body, "orderId");
-      if (orderId == null) {
-         return ResponseUtil.badArgument();
-      }
+    /**
+     * 删除订单
+     * <p>
+     * 1. 检测当前订单是否可以删除；
+     * 2. 删除订单。
+     *
+     * @param userId 用户ID
+     * @param body   订单信息，{ orderId：xxx }
+     * @return 订单操作结果
+     */
+    public Object delete(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        Integer orderId = JacksonUtil.parseInteger(body, "orderId");
+        if (orderId == null) {
+            return ResponseUtil.badArgument();
+        }
 
-      LitemallOrder order = orderService.findById(userId, orderId);
-      if (order == null) {
-         return ResponseUtil.badArgument();
-      }
-      if (!order.getUserId().equals(userId)) {
-         return ResponseUtil.badArgumentValue();
-      }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.badArgumentValue();
+        }
 
-      OrderHandleOption handleOption = OrderUtil.build(order);
-      if (!handleOption.isDelete()) {
-         return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能删除");
-      }
+        OrderHandleOption handleOption = OrderUtil.build(order);
+        if (!handleOption.isDelete()) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能删除");
+        }
 
-      // 订单order_status没有字段用于标识删除
-      // 而是存在专门的delete字段表示是否删除
-      orderService.deleteById(orderId);
-      // 售后也同时删除
-      aftersaleService.deleteByOrderId(userId, orderId);
+        // 订单order_status没有字段用于标识删除
+        // 而是存在专门的delete字段表示是否删除
+        orderService.deleteById(orderId);
+        // 售后也同时删除
+        aftersaleService.deleteByOrderId(userId, orderId);
 
-      return ResponseUtil.ok();
-   }
+        return ResponseUtil.ok();
+    }
 
-   /**
-    * 待评价订单商品信息
-    *
-    * @param userId  用户ID
-    * @param orderId 订单ID
-    * @param goodsId 商品ID
-    * @return 待评价订单商品信息
-    */
-   public Object goods(Integer userId, Integer orderId, Integer goodsId) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
-      LitemallOrder order = orderService.findById(userId, orderId);
-      if (order == null) {
-         return ResponseUtil.badArgument();
-      }
+    /**
+     * 待评价订单商品信息
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     * @param goodsId 商品ID
+     * @return 待评价订单商品信息
+     */
+    public Object goods(Integer userId, Integer orderId, Integer goodsId) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.badArgument();
+        }
 
-      List<LitemallOrderGoods> orderGoodsList = orderGoodsService.findByOidAndGid(orderId, goodsId);
-      int size = orderGoodsList.size();
+        List<LitemallOrderGoods> orderGoodsList = orderGoodsService.findByOidAndGid(orderId, goodsId);
+        int size = orderGoodsList.size();
 
-      Assert.state(size < 2, "存在多个符合条件的订单商品");
+        Assert.state(size < 2, "存在多个符合条件的订单商品");
 
-      if (size == 0) {
-         return ResponseUtil.badArgumentValue();
-      }
+        if (size == 0) {
+            return ResponseUtil.badArgumentValue();
+        }
 
-      LitemallOrderGoods orderGoods = orderGoodsList.get(0);
-      return ResponseUtil.ok(orderGoods);
-   }
+        LitemallOrderGoods orderGoods = orderGoodsList.get(0);
+        return ResponseUtil.ok(orderGoods);
+    }
 
-   /**
-    * 评价订单商品
-    * <p>
-    * 确认商品收货或者系统自动确认商品收货后7天内可以评价，过期不能评价。
-    *
-    * @param userId 用户ID
-    * @param body   订单信息，{ orderId：xxx }
-    * @return 订单操作结果
-    */
-   public Object comment(Integer userId, String body) {
-      if (userId == null) {
-         return ResponseUtil.unlogin();
-      }
+    /**
+     * 评价订单商品
+     * <p>
+     * 确认商品收货或者系统自动确认商品收货后7天内可以评价，过期不能评价。
+     *
+     * @param userId 用户ID
+     * @param body   订单信息，{ orderId：xxx }
+     * @return 订单操作结果
+     */
+    public Object comment(Integer userId, String body) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
 
-      Integer orderGoodsId = JacksonUtil.parseInteger(body, "orderGoodsId");
-      if (orderGoodsId == null) {
-         return ResponseUtil.badArgument();
-      }
-      LitemallOrderGoods orderGoods = orderGoodsService.findById(orderGoodsId);
-      if (orderGoods == null) {
-         return ResponseUtil.badArgumentValue();
-      }
-      Integer orderId = orderGoods.getOrderId();
-      LitemallOrder order = orderService.findById(userId, orderId);
-      if (order == null) {
-         return ResponseUtil.badArgumentValue();
-      }
-      Short orderStatus = order.getOrderStatus();
-      if (!OrderUtil.isConfirmStatus(order) && !OrderUtil.isAutoConfirmStatus(order)) {
-         return ResponseUtil.fail(ORDER_INVALID_OPERATION, "当前商品不能评价");
-      }
-      if (!order.getUserId().equals(userId)) {
-         return ResponseUtil.fail(ORDER_INVALID, "当前商品不属于用户");
-      }
-      Integer commentId = orderGoods.getComment();
-      if (commentId == -1) {
-         return ResponseUtil.fail(ORDER_COMMENT_EXPIRED, "当前商品评价时间已经过期");
-      }
-      if (commentId != 0) {
-         return ResponseUtil.fail(ORDER_COMMENTED, "订单商品已评价");
-      }
+        Integer orderGoodsId = JacksonUtil.parseInteger(body, "orderGoodsId");
+        if (orderGoodsId == null) {
+            return ResponseUtil.badArgument();
+        }
+        LitemallOrderGoods orderGoods = orderGoodsService.findById(orderGoodsId);
+        if (orderGoods == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        Integer orderId = orderGoods.getOrderId();
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        Short orderStatus = order.getOrderStatus();
+        if (!OrderUtil.isConfirmStatus(order) && !OrderUtil.isAutoConfirmStatus(order)) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "当前商品不能评价");
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.fail(ORDER_INVALID, "当前商品不属于用户");
+        }
+        Integer commentId = orderGoods.getComment();
+        if (commentId == -1) {
+            return ResponseUtil.fail(ORDER_COMMENT_EXPIRED, "当前商品评价时间已经过期");
+        }
+        if (commentId != 0) {
+            return ResponseUtil.fail(ORDER_COMMENTED, "订单商品已评价");
+        }
 
-      String content = JacksonUtil.parseString(body, "content");
-      Integer star = JacksonUtil.parseInteger(body, "star");
-      if (star == null || star < 0 || star > 5) {
-         return ResponseUtil.badArgumentValue();
-      }
-      Boolean hasPicture = JacksonUtil.parseBoolean(body, "hasPicture");
-      List<String> picUrls = JacksonUtil.parseStringList(body, "picUrls");
-      if (hasPicture == null || !hasPicture) {
-         picUrls = new ArrayList<>(0);
-      }
+        String content = JacksonUtil.parseString(body, "content");
+        Integer star = JacksonUtil.parseInteger(body, "star");
+        if (star == null || star < 0 || star > 5) {
+            return ResponseUtil.badArgumentValue();
+        }
+        Boolean hasPicture = JacksonUtil.parseBoolean(body, "hasPicture");
+        List<String> picUrls = JacksonUtil.parseStringList(body, "picUrls");
+        if (hasPicture == null || !hasPicture) {
+            picUrls = new ArrayList<>(0);
+        }
 
-      // 1. 创建评价
-      LitemallComment comment = new LitemallComment();
-      comment.setUserId(userId);
-      comment.setType((byte) 0);
-      comment.setValueId(orderGoods.getGoodsId());
-      comment.setStar(star.shortValue());
-      comment.setContent(content);
-      comment.setHasPicture(hasPicture);
-      comment.setPicUrls(picUrls.toArray(new String[]{}));
-      commentService.save(comment);
+        // 1. 创建评价
+        LitemallComment comment = new LitemallComment();
+        comment.setUserId(userId);
+        comment.setType((byte) 0);
+        comment.setValueId(orderGoods.getGoodsId());
+        comment.setStar(star.shortValue());
+        comment.setContent(content);
+        comment.setHasPicture(hasPicture);
+        comment.setPicUrls(picUrls.toArray(new String[]{}));
+        commentService.save(comment);
 
-      // 2. 更新订单商品的评价列表
-      orderGoods.setComment(comment.getId());
-      orderGoodsService.updateById(orderGoods);
+        // 2. 更新订单商品的评价列表
+        orderGoods.setComment(comment.getId());
+        orderGoodsService.updateById(orderGoods);
 
-      // 3. 更新订单中未评价的订单商品可评价数量
-      Short commentCount = order.getComments();
-      if (commentCount > 0) {
-         commentCount--;
-      }
-      order.setComments(commentCount);
-      orderService.updateWithOptimisticLocker(order);
+        // 3. 更新订单中未评价的订单商品可评价数量
+        Short commentCount = order.getComments();
+        if (commentCount > 0) {
+            commentCount--;
+        }
+        order.setComments(commentCount);
+        orderService.updateWithOptimisticLocker(order);
 
-      return ResponseUtil.ok();
-   }
+        return ResponseUtil.ok();
+    }
 }
