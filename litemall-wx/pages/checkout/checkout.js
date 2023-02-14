@@ -179,22 +179,10 @@ Page({
             }
           } else {
             console.log(444)
-            // wx.redirectTo({
-            //   url: '/pages/payResult/payResult?status=0&orderId=' + orderId
-            // });
-            if (grouponLinkId) {
-              setTimeout(() => {
-                wx.redirectTo({
-                  url: '/pages/groupon/grouponDetail/grouponDetail?id=' + grouponLinkId
-                })
-              }, 1000);
-            } else {
-              console.log(2222)
-              wx.redirectTo({
-                url: '/pages/payResult/payResult?status=1&orderId=' + orderId
-              });
-            }
-
+            wx.redirectTo({
+              url: '/pages/payResult/payResult?status=0&orderId=' + orderId
+            });
+            
           }
         });
 

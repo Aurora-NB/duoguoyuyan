@@ -90,18 +90,4 @@ litemall = Spring Boot后端 + Vue管理员前端 + 微信小程序用户前端 
    注意：
    > 这里只是最简启动方式，而小商场的微信登录、微信支付等功能需开发者设置才能运行，
    > 更详细方案请参考[文档](https://linlinjava.gitbook.io/litemall/project)。
-
-6. 启动轻商城前端
-
-    打开命令行，输入以下命令
-    ```bash
-    npm install -g cnpm --registry=https://registry.npm.taobao.org
-    cd litemall/litemall-vue
-    cnpm install
-    cnpm run dev
-    ```
-    此时，浏览器（建议采用chrome 手机模式）打开，输入网址`http://localhost:6255`, 此时进入轻商场。
-
-    注意：
-    > 现在功能很不稳定，处在开发阶段。
-        
+   
