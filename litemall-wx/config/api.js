@@ -4,7 +4,7 @@
 // 局域网测试使用69666666666666666666622222222222
 //var WxApiRoot = 'http://127.0.0.1:8080/wx/';
 // 云平台部署时使用
-var WxApiRoot = 'http://124.221.14.180:8080/wx/';
+var WxApiRoot = 'http://47.113.193.156:8080/wx/';
 // 云平台上线时使用是
 // var WxApiRoot = 'https://www.menethil.com.cn/wx/';
 

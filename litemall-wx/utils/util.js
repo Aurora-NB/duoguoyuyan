@@ -79,10 +79,15 @@ function redirect(url) {
 }
 
 function showErrorToast(msg) {
+  console.log(12333333)
   wx.showToast({
     title: msg,
     image: '/static/images/icon_error.png'
   })
+}
+
+function showErrorToast2(msg) {
+  console.log(12333333)
 }
 
 function changeLanguage(index){
